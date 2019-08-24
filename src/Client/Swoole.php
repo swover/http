@@ -10,16 +10,17 @@ class Swoole extends BaseClient
 {
     public function request($method, $url, $params, $jump_number = 0)
     {
-        $request = $this->filterUrl($url);
-        if (empty($request['domain'])) {
-            throw new \Exception('Has Not domain!');
+        $urlInfo = $this->parseUrl($url);
+        if (empty($urlInfo['host'])) {
+            throw new \Exception('Has Not Host!');
         }
-        $client = new Client($request['domain'], $request['port'], $request['https'] ? true : null);
+
+        $client = new Client($urlInfo['host'], $urlInfo['port'], $urlInfo['schema'] === 'https' ? true : null);
 
         $options = $this->buildOptions($params);
 
         if (!isset($options['headers']['Host'])) {
-            $options['headers']['Host'] = $request['domain'];
+            $options['headers']['Host'] = $urlInfo['host'];
         }
         if (isset($options['headers']['cookie']) && is_array($options['headers']['cookie'])) {
             $client->setCookies($options['headers']['cookie']);
@@ -35,14 +36,15 @@ class Swoole extends BaseClient
             $client->setData($options['json']);
         }
 
+        $urlInfo['path'] .= $urlInfo['query'] ? ('?' . $urlInfo['query']) : '';
         if ($method == 'POST') {
             if (isset($options['form_params'])) {
-                $client->post($request['path'], $options['form_params'] ?? []);
+                $client->post($urlInfo['path'], $options['form_params'] ?? []);
             } else {
-                $client->execute($request['path']);
+                $client->execute($urlInfo['path']);
             }
         } else {
-            $client->get($request['path']);
+            $client->get($urlInfo['path']);
         }
 
         if ($this->allow_redirects) {
@@ -69,7 +71,7 @@ class Swoole extends BaseClient
     {
         $headers = isset($params['headers']) ? $params['headers'] : [];
 
-        if (!isset($headers['User-Agent'])) {
+        if (!isset($headers['User-Agent'])) { //TODO
             if (isset($params['mobile_agent']) && $params['mobile_agent'] === true) {
                 $headers['User-Agent'] = $this->randomMobileAgent();
             } else {
@@ -144,51 +146,6 @@ class Swoole extends BaseClient
         }
 
         return $options;
-    }
-
-    private function filterUrl($url)
-    {
-        $result = [
-            'https' => false,
-            'domain' => '',
-            'path' => '/',
-            'port' => 80
-        ];
-
-        if (substr($url, 0, 8) == 'https://') {
-            $result['https'] = true;
-            $result['port'] = 443;
-            $url = substr($url, 8);
-        }
-
-        if (substr($url, 0, 7) == 'http://') {
-            $url = substr($url, 7);
-        }
-
-        $url = ltrim(ltrim(ltrim($url, ':'), '/'), ':');
-
-        $point = strpos($url, '/');
-        if ($point === false) {
-            $point = strpos($url, '?');
-            if ($point === false) {
-                $result['domain'] = $url;
-                $result['path'] = '/';
-            } else {
-                $result['domain'] = substr($url, 0, $point);
-                $result['path'] = '/' . substr($url, $point);
-            }
-        } else {
-            $result['domain'] = substr($url, 0, $point);
-            $result['path'] = substr($url, $point);
-        }
-
-        $temp = explode(':', $result['domain']);
-        if (count($temp) > 1) {
-            $result['domain'] = $temp[0];
-            $result['port'] = $temp[1];
-        }
-
-        return $result;
     }
 
     private static function fail($body = 'Undefined')

@@ -23,6 +23,17 @@ abstract class BaseClient
 
     abstract public function request($method, $url, $params, $jump_number = 0);
 
+    protected function parseUrl($url)
+    {
+        return array_merge([
+            'schema' => 'http',
+            'host' => '',
+            'port' => 80,
+            'path' => '/',
+            'query' => '',
+        ], \parse_url($url));
+    }
+
     protected function randUserAgent()
     {
         $agents = [
