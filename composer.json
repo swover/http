@@ -1,0 +1,34 @@
+{
+  "name": "swover/http",
+  "description": "Http Client",
+  "keywords": [
+    "swoole",
+    "http",
+    "guzzle",
+    "curl"
+  ],
+  "homepage": "https://github.com/swover/http",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Ruesin Liu",
+      "email": "ruesin@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0"
+  },
+  "require-dev": {
+    "ext-curl": "*",
+    "guzzlehttp/guzzle": "6.3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Swover\\Http\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+    }
+  }
+}
