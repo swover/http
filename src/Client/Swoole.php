@@ -10,22 +10,23 @@ class Swoole extends BaseClient
 {
     public function request($method, $url, $params, $jump_number = 0)
     {
+        $params = $this->keyToLower($params);
+
         $urlInfo = $this->parseUrl($url);
-        if (empty($urlInfo['host'])) {
-            throw new \Exception('Has Not Host!');
-        }
 
         $client = new Client($urlInfo['host'], $urlInfo['port'], $urlInfo['schema'] === 'https' ? true : null);
 
         $options = $this->buildOptions($params);
 
-        if (!isset($options['headers']['Host'])) {
-            $options['headers']['Host'] = $urlInfo['host'];
+        if (!isset($options['headers']['host'])) {
+            $options['headers']['host'] = $urlInfo['host'];
         }
+
         if (isset($options['headers']['cookie']) && is_array($options['headers']['cookie'])) {
             $client->setCookies($options['headers']['cookie']);
             unset($options['headers']['cookie']);
         }
+
         $client->setHeaders($options['headers']);
 
         $client->set($options['setting']);

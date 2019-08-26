@@ -36,6 +36,22 @@ abstract class BaseClient
         ], \parse_url($url));
     }
 
+    protected function keyToLower(array $array)
+    {
+        $result = [];
+        foreach ($array as $key => $value) {
+            $key = strtolower($key);
+            if ($key == 'headers' && is_array($value)) {
+                $headers = [];
+                foreach ($value as $hKey => $hVal) {
+                    $headers[strtolower($hKey)] = $hVal;
+                }
+                $value = $headers;
+            }
+            $result[$key] = $value;
+        }
+        return $result;
+    }
 
     private static function fail($body = 'Undefined')
     {
