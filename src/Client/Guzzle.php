@@ -34,31 +34,32 @@ class Guzzle extends BaseClient
     {
         $options = [];
 
-        if (isset($params['proxy']) && $params['proxy'] === true) {
+        /**
+         * proxy
+         */
+        if (isset($params['proxy']) && is_array($params['proxy']) && !empty($params['proxy'])) {
             $options['proxy'] = "http://username:password@192.168.16.1:10"; //TODO
         }
 
-        if (isset($params['form_params'])) {
-            if (!is_array($params['form_params'])) {
-                throw new \InvalidArgumentException('form params must array.');
-            }
-            $options['form_params'] = $params['form_params'];
+        /**
+         * form data
+         */
+        if (isset($params['body'])) {
+            $options['body'] = $params['body'];
         }
-
         if (isset($params['json'])) {
-            if (!is_array($params['json'])) {
-                throw new \InvalidArgumentException('json params must array.');
-            }
             $options['json'] = $params['json'];
         }
-
+        if (isset($params['form_params'])) {
+            $options['form_params'] = $params['form_params'];
+        }
         if (isset($params['multipart'])) {
-            if (!is_array($params['multipart'])) {
-                throw new \InvalidArgumentException('multipart params must array.');
-            }
             $options['multipart'] = $params['multipart'];
         }
 
+        /**
+         * headers
+         */
         if (!isset($params['headers'])) {
             $params['headers'] = [
                 'user-agent' => $this->randUserAgent()

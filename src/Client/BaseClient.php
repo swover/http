@@ -2,6 +2,8 @@
 
 namespace Swover\Http\Client;
 
+use Swover\Http\Response;
+
 abstract class BaseClient
 {
     protected $timeout = 10;
@@ -32,6 +34,14 @@ abstract class BaseClient
             'path' => '/',
             'query' => '',
         ], \parse_url($url));
+    }
+
+
+    private static function fail($body = 'Undefined')
+    {
+        $response = new Response();
+        $response->setBody($body);
+        return $response;
     }
 
     protected function randUserAgent()

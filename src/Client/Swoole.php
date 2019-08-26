@@ -147,11 +147,4 @@ class Swoole extends BaseClient
 
         return $options;
     }
-
-    private static function fail($body = 'Undefined')
-    {
-        $response = new Response();
-        $response->setBody($body);
-        return $response;
-    }
 }
