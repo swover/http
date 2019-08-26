@@ -62,10 +62,41 @@ class Swoole extends BaseClient
 
         $client->url = $url;
 
-        $response = new Response($client);
+        $response = $this->getResponse($client);
 
         $client->close();
         return $response;
+    }
+
+    /**
+     * @param $client
+     * @return Response|void
+     */
+    protected function getResponse($client)
+    {
+        $data = [
+            'status' => true,
+            'errCode' => $client->errCode,
+            'statusCode' => $client->statusCode,
+            'headers' => $client->headers,
+            'cookies' => $client->cookies,
+            'url' => $client->url,
+        ];
+        if ($client->statusCode < 0) {
+            $data['status'] = false;
+            $data['body'] = $client->errMsg ?? " Time Out [{$client->statusCode}]. ";
+        }
+
+        if ($client->errCode > 0) {
+            $data['status'] = false;
+            $data['body'] .= function_exists('socket_strerror') ? socket_strerror($this->errCode) : '';
+        }
+
+        if ($data['status'] == true) {
+            $data['body'] = $client->body;
+        }
+
+        return new Response($data);
     }
 
     private function buildHeaders($params)

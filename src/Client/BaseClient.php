@@ -25,6 +25,10 @@ abstract class BaseClient
 
     abstract public function request($method, $url, $params, $jump_number = 0);
 
+    protected function getResponse($result)
+    {
+    }
+
     protected function parseUrl($url)
     {
         return array_merge([
@@ -55,9 +59,10 @@ abstract class BaseClient
 
     private static function fail($body = 'Undefined')
     {
-        $response = new Response();
-        $response->setBody($body);
-        return $response;
+        return new Response([
+            'status' => false,
+            'body' => $body
+        ]);
     }
 
     protected function randUserAgent()

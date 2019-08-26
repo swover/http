@@ -1,4 +1,5 @@
 <?php
+
 namespace Swover\Http;
 
 class Response
@@ -17,48 +18,16 @@ class Response
 
     private $url = null;
 
-    public function __construct(\Swoole\Coroutine\Http\Client $cli = null)
+    public function __construct($data = [])
     {
-        if (!$cli) {
+        if (empty($data)) {
             $this->status = false;
-            return false;
+            return true;
         }
 
-        $this->errCode = $cli->errCode;
-        $this->statusCode = $cli->statusCode;
-
-        if ($cli->statusCode < 0) {
-            $this->status = false;
-            $this->body = " Time Out [{$cli->statusCode}]. ";
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
         }
-
-        if ( $cli->errCode > 0 ) {
-            $this->status = false;
-            $this->body .= socket_strerror($this->errCode);
-        }
-
-        if ($this->status == true) {
-            $this->body = $cli->body;
-        }
-
-        $this->headers = $cli->headers;
-
-        $this->cookies = $cli->cookies;
-
-        if (isset($cli->url)) {
-            $this->url = $cli->url;
-        }
-
-        return true;
-    }
-
-    public function setBody($message)
-    {
-        if ($this->status == true) {
-            return false;
-        }
-        $this->body = $message;
-        return true;
     }
 
     public function getStatus()
@@ -66,9 +35,6 @@ class Response
         return $this->status;
     }
 
-    /**
-     * @return string
-     */
     public function getBody()
     {
         return $this->body;
@@ -76,7 +42,7 @@ class Response
 
     public function getHeader($header)
     {
-        return $this->headers[$header]??null;
+        return $this->headers[$header] ?? null;
     }
 
     public function getHeaders()
