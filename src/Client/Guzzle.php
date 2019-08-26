@@ -6,6 +6,10 @@ class Guzzle extends BaseClient
 {
     public function request($method, $url, $params, $jump_number = 0)
     {
+        $params = $this->keyToLower($params);
+
+        $urlInfo = $this->parseUrl($url);
+
         $config = [
             //'base_uri'        => '',
             'timeout' => $this->timeout,
@@ -17,8 +21,6 @@ class Guzzle extends BaseClient
         $client = new \GuzzleHttp\Client($config);
 
         $options = $this->buildOptions($params);
-
-        $urlInfo = $this->parseUrl($url);
 
         if ($urlInfo['schema'] === 'https') {
             $options['ssl.certificate_authority'] = false;

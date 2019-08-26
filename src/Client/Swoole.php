@@ -72,11 +72,11 @@ class Swoole extends BaseClient
     {
         $headers = isset($params['headers']) ? $params['headers'] : [];
 
-        if (!isset($headers['User-Agent'])) { //TODO
+        if (!isset($headers['user-agent'])) { //TODO
             if (isset($params['mobile_agent']) && $params['mobile_agent'] === true) {
-                $headers['User-Agent'] = $this->randomMobileAgent();
+                $headers['user-agent'] = $this->randomMobileAgent();
             } else {
-                $headers['User-Agent'] = $this->randUserAgent();
+                $headers['user-agent'] = $this->randUserAgent();
             }
         }
 
@@ -137,7 +137,7 @@ class Swoole extends BaseClient
 
         if (isset($params['json'])) {
             if (is_array($params['json'])) {
-                $params['json'] = json_encode($params['json'], JSON_UNESCAPED_UNICODE);
+                $params['json'] = json_encode($params['json'], JSON_UNESCAPED_UNICODE); //TODO
             }
             $options['json'] = $params['json'];
         }
