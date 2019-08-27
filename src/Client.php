@@ -30,7 +30,7 @@ class Client
             return new Stream($params);
         }
 
-        return new (self::$handler)($params);
+        return (new self::$handler)($params);
     }
 
     public static function setHandler($handler)
