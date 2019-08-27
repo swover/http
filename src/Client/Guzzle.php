@@ -62,17 +62,23 @@ class Guzzle extends BaseClient
         /**
          * headers
          */
-        if (!isset($params['headers'])) {
-            $params['headers'] = [
-                'user-agent' => $this->randUserAgent()
-            ];
-        }
-
-        $options['headers'] = $params['headers'];
-        if (!isset($params['headers']['user-agent'])) {
-            $options['headers']['user-agent'] = $this->randUserAgent();
-        }
+        $options['headers'] = $this->buildHeaders($params);
 
         return $options;
+    }
+
+    public function buildHeaders($params)
+    {
+        $headers = isset($params['headers']) ? $params['headers'] : [];
+
+        if (!isset($headers['user-agent'])) {
+            if (boolval($params['mobile_agent'] ?? false) === true) {
+                $headers['user-agent'] = $this->randomMobileAgent();
+            } else {
+                $headers['user-agent'] = $this->randUserAgent();
+            }
+        }
+
+        return $headers;
     }
 }
