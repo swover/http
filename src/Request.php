@@ -86,6 +86,7 @@ class Request
      * @param array $params
      * - config
      * - options
+     * - headers
      * - proxy
      * - handler
      * @return mixed|Response

@@ -24,9 +24,9 @@ class Swoole extends BaseClient
             $options['headers']['host'] = $urlInfo['host'];
         }
 
-        if (isset($options['headers']['cookie']) && is_array($options['headers']['cookie'])) {
-            $client->setCookies($options['headers']['cookie']);
-            unset($options['headers']['cookie']);
+        if (isset($options['cookies']) && is_array($options['cookies'])) {
+            $client->setCookies($options['cookies']);
+            unset($options['cookies']);
         }
 
         $client->setHeaders($options['headers']);
@@ -106,17 +106,11 @@ class Swoole extends BaseClient
     {
         $headers = isset($params['headers']) ? $params['headers'] : [];
 
-        if (!isset($headers['user-agent'])) { //TODO
-            if (isset($params['mobile_agent']) && $params['mobile_agent'] === true) {
+        if (!isset($headers['user-agent'])) {
+            if (boolval($params['mobile_agent'] ?? false) === true) {
                 $headers['user-agent'] = $this->randomMobileAgent();
             } else {
                 $headers['user-agent'] = $this->randUserAgent();
-            }
-        }
-
-        if (isset($params['cookie'])) {
-            if (!isset($headers['cookie']) || empty($headers['cookie'])) {
-                $headers['cookie'] = $params['cookie'];
             }
         }
 
@@ -169,9 +163,13 @@ class Swoole extends BaseClient
             'setting' => $this->buildSetting($params)
         ];
 
+        /*if (isset($params['cookies']) && is_array($params['cookies'])) {
+            $options['cookies'] = $params['cookies'];
+        }*/
+
         if (isset($params['json'])) {
             if (is_array($params['json'])) {
-                $params['json'] = json_encode($params['json'], JSON_UNESCAPED_UNICODE); //TODO
+                $params['json'] = call_user_func(function_exists('json_encode') ? 'json_encode' : 'http_build_query', $params['json']);
             }
             $options['json'] = $params['json'];
         }
