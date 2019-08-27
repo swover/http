@@ -8,7 +8,9 @@ use Swoole\Coroutine\Http\Client;
 
 class Swoole extends BaseClient
 {
-    public function request($method, $url, $params, $jump_number = 0)
+    protected $jump_number = 0;
+
+    public function request($method, $url, $params)
     {
         $params = $this->keyToLower($params);
 
@@ -16,7 +18,7 @@ class Swoole extends BaseClient
 
         $client = new Client($urlInfo['host'], $urlInfo['port'], $urlInfo['schema'] === 'https' ? true : null);
 
-        $options = $this->buildOptions($params);
+        $options = array_merge($params['options'] ?? [], $this->buildOptions($params));
 
         if (!isset($options['headers']['host'])) {
             $options['headers']['host'] = $urlInfo['host'];
@@ -51,11 +53,12 @@ class Swoole extends BaseClient
         if ($this->allow_redirects) {
             if ($client->statusCode == 302 || $client->statusCode == 301
                 || (isset($client->headers['location']) && mb_strlen($client->headers['location']) > 0)) {
-                if ($jump_number <= $this->max_jump) {
+                if ($this->jump_number <= $this->max_jump) {
                     $url = $client->headers['location'];
                     $client->close();
                     $client = null;
-                    return $this->request($method, $url, $params, ($jump_number + 1));
+                    $this->jump_number++;
+                    return $this->request($method, $url, $params);
                 }
             }
         }

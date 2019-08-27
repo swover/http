@@ -14,21 +14,37 @@ class Request
         return self::send($url, 'POST', $params);
     }
 
-    public static function autoGet(string $url, $params = [], $backData = [], $callback = null, $errCallback = null)
+    public static function autoGet(string $url, $params = [], $callback = null, $errCallback = null)
     {
-        return self::autoSend('GET', $url, $params, $backData, $callback, $errCallback);
+        return self::autoSend('GET', $url, $params, $callback, $errCallback);
     }
 
-    public static function autoPost($url, $params = [], $backData = [], $callback = null, $errCallback = null)
+    public static function autoPost($url, $params = [], $callback = null, $errCallback = null)
     {
-        return self::autoSend('POST', $url, $params, $backData, $callback, $errCallback);
+        return self::autoSend('POST', $url, $params, $callback, $errCallback);
     }
 
-    private static function autoSend($method, $url, $params = [], $backData = [], $callback = null, $errCallback = null)
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $params
+     * - auto_param
+     * - back_data
+     * - config
+     * - options
+     * - proxy
+     * @param $callback
+     * @param $errCallback
+     * @return mixed|Response
+     * @throws \Exception
+     */
+    private static function autoSend($method, $url, $params = [], $callback = null, $errCallback = null)
     {
         $auto_param = $params['auto_param'] ?? [];
         $retry_count = $auto_param['retry_count'] ?? 1;
         unset($params['auto_param']);
+
+        $backData = $params['back_data'] ?? [];
 
         $message = '';
         for ($retry = 0; $retry < $retry_count; $retry++) {
@@ -36,7 +52,9 @@ class Request
                 \Swoole\Coroutine::sleep(intval($auto_param['retry_sleep']));
             }
 
-            $params['retry'] = $retry;
+            if ($retry > 0) {
+                $params['proxy'] = $params['proxy'] ?? true;
+            }
 
             try {
                 $response = self::send($url, $method, $params);
@@ -62,16 +80,18 @@ class Request
         throw new \Exception($message);
     }
 
-    public static function send($url, $method, $params)
+    /**
+     * @param string $url
+     * @param string $method
+     * @param array $params
+     * - config
+     * - options
+     * - proxy
+     * - handler
+     * @return mixed|Response
+     */
+    public static function send(string $url, $method, $params)
     {
-        $config = [];
-        if (isset($params['allow_redirects'])) {
-            $config['allow_redirects'] = $params['allow_redirects'];
-        }
-        if (isset($params['timeout'])) {
-            $config['timeout'] = $params['timeout'];
-        }
-
-        return Client::getClient($config)->request($method, $url, $params);
+        return Client::getClient($params)->request($method, $url, $params);
     }
 }

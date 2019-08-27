@@ -12,23 +12,25 @@ class Client
 {
     protected static $handler = false;
 
-    public static function getClient($config)
+    public static function getClient($params)
     {
+        self::setHandler($params['handler'] ?? false); //TODO
+
         if (PHP_SAPI == 'cli'
             && class_exists('\Swoole\Coroutine')
             && \Swoole\Coroutine::getCid() > 0) {
-            if (self::$handler === false) return new Swoole($config);
+            if (self::$handler === false) return new Swoole($params);
         }
 
         if (self::$handler === false || !class_exists(self::$handler)) {
-            if (class_exists('\GuzzleHttp\Client')) return new Guzzle($config);
+            if (class_exists('\GuzzleHttp\Client')) return new Guzzle($params);
 
-            if (extension_loaded('curl')) return new Curl($config);
+            if (extension_loaded('curl')) return new Curl($params);
 
-            return new Stream($config);
+            return new Stream($params);
         }
 
-        return new (self::$handler)($config);
+        return new (self::$handler)($params);
     }
 
     public static function setHandler($handler)

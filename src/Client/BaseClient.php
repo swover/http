@@ -12,8 +12,9 @@ abstract class BaseClient
 
     protected $max_jump = 10;
 
-    public function __construct($config)
+    public function __construct($params)
     {
+        $config = $params['config'] ?? [];
         if (isset($config['allow_redirects'])) {
             $this->allow_redirects = boolval($config['allow_redirects']);
         }
@@ -23,7 +24,7 @@ abstract class BaseClient
         }
     }
 
-    abstract public function request($method, $url, $params, $jump_number = 0);
+    abstract public function request($method, $url, $params);
 
     protected function getResponse($result)
     {
