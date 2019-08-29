@@ -2,6 +2,11 @@
 
 namespace Swover\Http;
 
+use Swover\Http\Client\Curl;
+use Swover\Http\Client\Guzzle;
+use Swover\Http\Client\Stream;
+use Swover\Http\Client\Swoole;
+
 /**
  * @method static Response get($url, $params = [])
  * @method static Response post($url, $params = [])
@@ -33,6 +38,10 @@ class Request
      */
     public static function send(string $url, $method, $params)
     {
-        return Client::getClient($params)->request(strtoupper($method), $url, $params);
+        $client = HttpFactory::getHandler($params['handler'] ?? false);
+        
+        $instance = is_object($client) ? $client : (new $client($params));
+
+        return $instance->request(strtoupper($method), $url, $params);
     }
 }
