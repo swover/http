@@ -2,7 +2,6 @@
 
 namespace Swover\Http\Client;
 
-use Swover\Http\Proxy;
 use Swover\Http\Response;
 use Swoole\Coroutine\Http\Client;
 
@@ -12,7 +11,7 @@ class Swoole extends BaseClient
 
     public function request($method, $url, $params)
     {
-        $params = $this->keyToLower($params);
+        $params = $this->formatParams($params);
 
         $urlInfo = $this->parseUrl($url);
 
@@ -20,39 +19,32 @@ class Swoole extends BaseClient
 
         $options = array_merge($params['options'] ?? [], $this->buildOptions($params));
 
-        if (!isset($options['headers']['host'])) {
-            $options['headers']['host'] = $urlInfo['host'];
-        }
+        $headers = $this->buildHeaders($params);
+        $headers['host'] = $headers['host'] ?? $urlInfo['host'];
+        $client->setHeaders(array_merge($options['headers'], $headers));
+
+        $client->set(array_merge($options['setting'], $this->buildSetting($params)));
 
         if (isset($options['cookies']) && is_array($options['cookies'])) {
             $client->setCookies($options['cookies']);
             unset($options['cookies']);
         }
 
-        $client->setHeaders($options['headers']);
-
-        $client->set($options['setting']);
-
         $client->setMethod($method);
-
         if (isset($options['json'])) {
             $client->setData($options['json']);
         }
 
-        $urlInfo['path'] .= $urlInfo['query'] ? ('?' . $urlInfo['query']) : '';
-        if ($method == 'POST') {
-            if (isset($options['form_params'])) {
-                $client->post($urlInfo['path'], $options['form_params'] ?? []);
-            } else {
-                $client->execute($urlInfo['path']);
-            }
+        $path = $urlInfo['path'] . $urlInfo['query'] ? ('?' . $urlInfo['query']) : '';
+        if ($method == 'POST' && isset($options['form_params'])) {
+            $client->post($path, $options['form_params'] ?? []);
         } else {
-            $client->get($urlInfo['path']);
+            $client->execute($path);
         }
 
         if ($this->allow_redirects) {
             if ($client->statusCode == 302 || $client->statusCode == 301
-                || (isset($client->headers['location']) && mb_strlen($client->headers['location']) > 0)) {
+                || (isset($client->headers['location']) && strlen($client->headers['location']) > 0)) {
                 if ($this->jump_number <= $this->max_jump) {
                     $url = $client->headers['location'];
                     $client->close();
@@ -124,44 +116,39 @@ class Swoole extends BaseClient
             'ssl_verify_peer' => false,
         ];
 
-        if (!isset($params['proxy_setting']) || empty($params['proxy_setting'])) {
-            if ((isset($params['proxy']) && $params['proxy'] === true)
-                || (isset($params['retry']) && intval($params['retry']) > 0)) {
-                $proxy = Proxy::get();
-                if (isset($proxy['host']) && isset($proxy['port'])) {
-                    $params['proxy_setting'] = $proxy;
+        $params['proxy'] = $params['proxy'] ?? false;
+        if ($params['proxy']) {
+            if (is_array($params['proxy'])) {
+            } elseif (is_bool($params['proxy'])) {
+                //TODO
+            } else {
+                //TODO
+            }
+
+            if (($params['proxy']['host'] ?? false)
+                && ($params['proxy']['host'] ?? false)) {
+                $schema = $params['proxy']['schema'] ?? 'http';
+                if ($schema == 'http') {
+                    $result['http_proxy_host'] = $params['proxy']['host'];
+                    $result['http_proxy_port'] = $params['proxy']['port'];
+                    $result['http_proxy_user'] = $params['proxy']['user'] ?? '';
+                    $result['http_proxy_password'] = $params['proxy']['password'] ?? '';
+                }
+                if ($schema == 'socks5') {
+                    $result['socks5_host'] = $params['proxy']['host'];
+                    $result['socks5_port'] = $params['proxy']['port'];
+                    $result['socks5_username'] = $params['proxy']['user'] ?? '';
+                    $result['socks5_password'] = $params['proxy']['password'] ?? '';
                 }
             }
-        }
-
-        if (isset($params['proxy_setting'])) {
-            $params['proxy_setting'] = $this->buildHttpProxy($params['proxy_setting']);
-            $setting += $params['proxy_setting'];
         }
 
         return $setting;
     }
 
-    private function buildHttpProxy($proxy)
-    {
-        $result = [
-            'http_proxy_host' => $proxy['host'] ?? ($proxy['http_proxy_host'] ?? ''),
-            'http_proxy_port' => $proxy['port'] ?? ($proxy['http_proxy_port'] ?? ''),
-            'http_proxy_user' => $proxy['user'] ?? ($proxy['http_proxy_user'] ?? ''),
-            'http_proxy_password' => $proxy['password'] ?? ($proxy['http_proxy_password'] ?? ''),
-        ];
-        if (!$result['http_proxy_host'] || !$result['http_proxy_port']) {
-            return [];
-        }
-        return $result;
-    }
-
     private function buildOptions($params)
     {
-        $options = [
-            'headers' => $this->buildHeaders($params),
-            'setting' => $this->buildSetting($params)
-        ];
+        $options = [];
 
         /*if (isset($params['cookies']) && is_array($params['cookies'])) {
             $options['cookies'] = $params['cookies'];

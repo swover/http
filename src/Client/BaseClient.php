@@ -26,9 +26,7 @@ abstract class BaseClient
 
     abstract public function request($method, $url, $params);
 
-    protected function getResponse($result)
-    {
-    }
+    abstract protected function getResponse($result);
 
     protected function parseUrl($url)
     {
@@ -41,7 +39,7 @@ abstract class BaseClient
         ], \parse_url($url));
     }
 
-    protected function keyToLower(array $array)
+    protected function formatParams(array $array)
     {
         $result = [];
         foreach ($array as $key => $value) {
@@ -56,14 +54,6 @@ abstract class BaseClient
             $result[$key] = $value;
         }
         return $result;
-    }
-
-    private static function fail($body = 'Undefined')
-    {
-        return new Response([
-            'status' => false,
-            'body' => $body
-        ]);
     }
 
     protected function randUserAgent()
