@@ -26,7 +26,24 @@ abstract class BaseClient
 
     abstract public function request($method, $url, $params);
 
-    abstract protected function getResponse($result);
+    /**
+     * @param $data
+     * @return Response
+     */
+    protected function response($data)
+    {
+        if ($data['statusCode'] < 0) {
+            $data['status'] = false;
+            $data['body'] = $client->errMsg ?? " Time Out [{$data['statusCode']}]. ";
+        }
+
+        if ($data['errCode'] > 0) {
+            $data['status'] = false;
+            $data['body'] .= function_exists('socket_strerror') ? socket_strerror($data['errCode']) : '';
+        }
+
+        return new Response($data);
+    }
 
     protected function parseUrl($url)
     {

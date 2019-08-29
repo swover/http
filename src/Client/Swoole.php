@@ -2,7 +2,6 @@
 
 namespace Swover\Http\Client;
 
-use Swover\Http\Response;
 use Swoole\Coroutine\Http\Client;
 
 class Swoole extends BaseClient
@@ -55,43 +54,18 @@ class Swoole extends BaseClient
             }
         }
 
-        $client->url = $url;
-
-        $response = $this->getResponse($client);
-
-        $client->close();
-        return $response;
-    }
-
-    /**
-     * @param $client
-     * @return Response|void
-     */
-    protected function getResponse($client)
-    {
-        $data = [
+        $response = $this->response([
             'status' => true,
             'errCode' => $client->errCode,
             'statusCode' => $client->statusCode,
             'headers' => $client->headers,
             'cookies' => $client->cookies,
-            'url' => $client->url,
-        ];
-        if ($client->statusCode < 0) {
-            $data['status'] = false;
-            $data['body'] = $client->errMsg ?? " Time Out [{$client->statusCode}]. ";
-        }
+            'url' => $url,
+            'body' => $client->body
+        ]);
 
-        if ($client->errCode > 0) {
-            $data['status'] = false;
-            $data['body'] .= function_exists('socket_strerror') ? socket_strerror($this->errCode) : '';
-        }
-
-        if ($data['status'] == true) {
-            $data['body'] = $client->body;
-        }
-
-        return new Response($data);
+        $client->close();
+        return $response;
     }
 
     private function buildHeaders($params)

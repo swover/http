@@ -2,8 +2,6 @@
 
 namespace Swover\Http\Client;
 
-use Swover\Http\Response;
-
 class Guzzle extends BaseClient
 {
     public function request($method, $url, $params)
@@ -32,7 +30,16 @@ class Guzzle extends BaseClient
 
         $result = $client->request($method, $url, $options);
 
-        $response = $this->getResponse($result);
+        $response = $this->response([
+            'status' => true,
+            'errCode' => $result->getErrCode(),
+            'statusCode' => $result->getStatusCode(),
+            'headers' => $result->getHeaders(),
+            'cookies' => $result->getCookies(),
+            'url' => $result->getUrl(),
+            'body' => (string)$result->getBody()
+        ]);
+
         $client = null;
         return $response;
     }
@@ -85,37 +92,5 @@ class Guzzle extends BaseClient
         }
 
         return $headers;
-    }
-
-    /**
-     * @param $result \Psr\Http\Message\ResponseInterface|Response
-     * @return Response
-     */
-    protected function getResponse($result)
-    {
-
-        $data = [
-            'status' => true,
-            'errCode' => $result->getErrCode(),
-            'statusCode' => $result->getStatusCode(),
-            'headers' => $result->getHeaders(),
-            'cookies' => $result->getCookies(),
-            'url' => $result->getUrl(),
-        ];
-        if ($data['statusCode'] < 0) {
-            $data['status'] = false;
-            $data['body'] = $client->errMsg ?? " Time Out [{$data['statusCode']}]. ";
-        }
-
-        if ($data['errCode'] > 0) {
-            $data['status'] = false;
-            $data['body'] .= function_exists('socket_strerror') ? socket_strerror($data['errCode']) : '';
-        }
-
-        if ($data['status'] == true) {
-            $data['body'] = (string)$result->getBody();
-        }
-
-        return new Response($data);
     }
 }
