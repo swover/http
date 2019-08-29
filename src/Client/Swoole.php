@@ -90,30 +90,20 @@ class Swoole extends BaseClient
             'ssl_verify_peer' => false,
         ];
 
-        $params['proxy'] = $params['proxy'] ?? false;
-        if ($params['proxy']) {
-            if (is_array($params['proxy'])) {
-            } elseif (is_bool($params['proxy'])) {
-                //TODO
-            } else {
-                //TODO
+        $proxy = $this->getProxy($params['proxy'] ?? false);
+        if (($proxy['host'] ?? false) && ($proxy['host'] ?? false)) {
+            $schema = $proxy['schema'] ?? 'http';
+            if ($schema == 'http') {
+                $result['http_proxy_host'] = $proxy['host'];
+                $result['http_proxy_port'] = $proxy['port'];
+                $result['http_proxy_user'] = $proxy['user'] ?? '';
+                $result['http_proxy_password'] = $proxy['pass'] ?? '';
             }
-
-            if (($params['proxy']['host'] ?? false)
-                && ($params['proxy']['host'] ?? false)) {
-                $schema = $params['proxy']['schema'] ?? 'http';
-                if ($schema == 'http') {
-                    $result['http_proxy_host'] = $params['proxy']['host'];
-                    $result['http_proxy_port'] = $params['proxy']['port'];
-                    $result['http_proxy_user'] = $params['proxy']['user'] ?? '';
-                    $result['http_proxy_password'] = $params['proxy']['password'] ?? '';
-                }
-                if ($schema == 'socks5') {
-                    $result['socks5_host'] = $params['proxy']['host'];
-                    $result['socks5_port'] = $params['proxy']['port'];
-                    $result['socks5_username'] = $params['proxy']['user'] ?? '';
-                    $result['socks5_password'] = $params['proxy']['password'] ?? '';
-                }
+            if ($schema == 'socks5') {
+                $result['socks5_host'] = $proxy['host'];
+                $result['socks5_port'] = $proxy['port'];
+                $result['socks5_username'] = $proxy['user'] ?? '';
+                $result['socks5_password'] = $proxy['pass'] ?? '';
             }
         }
 

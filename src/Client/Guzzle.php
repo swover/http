@@ -6,7 +6,7 @@ class Guzzle extends BaseClient
 {
     public function request($method, $url, $params)
     {
-        $params = $this->keyToLower($params);
+        $params = $this->formatParams($params);
 
         $urlInfo = $this->parseUrl($url);
 
@@ -51,8 +51,15 @@ class Guzzle extends BaseClient
         /**
          * proxy
          */
-        if (isset($params['proxy']) && is_array($params['proxy']) && !empty($params['proxy'])) {
-            $options['proxy'] = "http://username:password@192.168.16.1:10"; //TODO
+        $proxy = $this->getProxy($params['proxy'] ?? false);
+        if (($proxy['host'] ?? false) && ($proxy['host'] ?? false)) {
+            $schema = $proxy['schema'] ?? 'http';
+            $options['proxy'] = $schema . '://';
+            if ($proxy['user'] ?? false) {
+                $options['proxy'] .= $proxy['user'] . ':' . ($proxy['pass'] ?? '') . '@';
+            }
+            //http://username:password@192.168.16.1:10
+            $options['proxy'] .= $proxy['host'] . ':' . $proxy['port'];
         }
 
         /**

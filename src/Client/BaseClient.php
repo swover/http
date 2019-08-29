@@ -73,6 +73,27 @@ abstract class BaseClient
         return $result;
     }
 
+    protected function getProxy($proxy)
+    {
+        if (is_bool($proxy) && $proxy === true) {
+            //TODO
+            $proxy = [];
+        }
+
+        if (is_string($proxy) && is_callable($proxy)) {
+            $proxy = call_user_func($proxy);
+        }
+
+        if (is_array($proxy)) return $proxy;
+
+        if (is_string($proxy)) {
+            //http://username:password@192.168.16.1:10
+            return parse_url($proxy);
+        }
+
+        return [];
+    }
+
     protected function randUserAgent()
     {
         $agents = [
