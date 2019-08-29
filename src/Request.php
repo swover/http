@@ -2,16 +2,22 @@
 
 namespace Swover\Http;
 
+/**
+ * @method static Response get($url, $params = [])
+ * @method static Response post($url, $params = [])
+ * @method static Response put($url, $params = [])
+ * @method static Response delete($url, $params = [])
+ * @method static Response patch($url, $params = [])
+ * @method static Response head($url, $params = [])
+ * @method static Response options($url, $params = [])
+ */
 class Request
 {
-    public static function get($url, $params = [])
+    public static function __callStatic($name, $arguments)
     {
-        return self::send($url, 'GET', $params);
-    }
-
-    public static function post($url, $params = [])
-    {
-        return self::send($url, 'POST', $params);
+        if (in_array(strtolower($name), ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'])) {
+            return self::send($arguments[0] ?? '', strtoupper($name), $arguments[1] ?? []);
+        }
     }
 
     /**
@@ -27,6 +33,6 @@ class Request
      */
     public static function send(string $url, $method, $params)
     {
-        return Client::getClient($params)->request($method, $url, $params);
+        return Client::getClient($params)->request(strtoupper($method), $url, $params);
     }
 }
