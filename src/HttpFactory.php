@@ -50,7 +50,7 @@ class HttpFactory
         self::$proxy = $handler;
     }
 
-    public static function getProxy($handler)
+    public static function getProxy()
     {
         return self::$proxy;
     }

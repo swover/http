@@ -2,6 +2,7 @@
 
 namespace Swover\Http\Client;
 
+use Swover\Http\HttpFactory;
 use Swover\Http\Response;
 
 abstract class BaseClient
@@ -76,8 +77,7 @@ abstract class BaseClient
     protected function getProxy($proxy)
     {
         if (is_bool($proxy) && $proxy === true) {
-            //TODO
-            $proxy = [];
+            $proxy = is_callable(HttpFactory::getProxy()) ? call_user_func(HttpFactory::getProxy()) : [];
         }
 
         if (is_string($proxy) && is_callable($proxy)) {
