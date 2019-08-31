@@ -35,20 +35,29 @@ class Guzzle extends BaseClient
             $options['verify'] = false;
         }
 
-        $result = $client->request($method, $url, $options);
+        try {
+            $result = $client->request($method, $url, $options);
 
-        $response = $this->response([
-            'status' => true,
-            'errCode' => 0,
-            'statusCode' => $result->getStatusCode(),
-            'headers' => $result->getHeaders(),
-            'cookies' => [],
-            'url' => '',//$result->getHeaders(),
-            'body' => (string)$result->getBody()
-        ]);
+            return $this->response([
+                'status' => true,
+                'errCode' => 0,
+                'statusCode' => $result->getStatusCode(),
+                'headers' => $result->getHeaders(),
+                'cookies' => [],
+                'url' => '',//$result->getHeaders(),
+                'body' => (string)$result->getBody()
+            ]);
 
-        $client = null;
-        return $response;
+        } catch (\Throwable $e) {
+            return $this->response([
+                'status' => false,
+                'errCode' => $e->getCode(),
+                'statusCode' => -1,
+                'body' => (string)$e->getMessage()
+            ]);
+        } finally {
+            $client = null;
+        }
     }
 
     private function buildOptions($params = [])

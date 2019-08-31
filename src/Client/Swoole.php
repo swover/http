@@ -54,18 +54,20 @@ class Swoole extends BaseClient
             }
         }
 
-        $response = $this->response([
-            'status' => true,
-            'errCode' => $client->errCode,
-            'statusCode' => $client->statusCode,
-            'headers' => $client->headers,
-            'cookies' => $client->cookies,
-            'url' => $url,
-            'body' => $client->body
-        ]);
-
-        $client->close();
-        return $response;
+        try {
+            return $this->response([
+                'status' => true,
+                'errCode' => $client->errCode,
+                'statusCode' => $client->statusCode,
+                'headers' => $client->headers,
+                'cookies' => $client->cookies,
+                'url' => $url,
+                'body' => $client->body
+            ]);
+        } finally {
+            $client->close();
+            $client = null;
+        }
     }
 
     private function buildHeaders($params)

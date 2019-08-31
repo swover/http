@@ -35,7 +35,7 @@ abstract class BaseClient
     {
         if ($data['statusCode'] < 0) {
             $data['status'] = false;
-            $data['body'] = $client->errMsg ?? " Time Out [{$data['statusCode']}]. ";
+            $data['body'] = $data['body'] ?? " Time Out [{$data['statusCode']}]. ";
         }
 
         if ($data['errCode'] > 0) {
