@@ -2,6 +2,8 @@
 
 namespace Swover\Http\Client;
 
+use GuzzleHttp\Cookie\CookieJar;
+
 class Guzzle extends BaseClient
 {
     public function request($method, $url, $params)
@@ -21,22 +23,27 @@ class Guzzle extends BaseClient
         $client = new \GuzzleHttp\Client($config);
 
         $options = $this->buildOptions($params);
+        /**
+         * cookies
+         */
+        if (isset($params['cookies']) && is_array($params['cookies'])) {
+            $options['cookies'] = CookieJar::fromArray($params['cookies'], $urlInfo['host']);
+        }
 
         if ($urlInfo['schema'] === 'https') {
             $options['ssl.certificate_authority'] = false;
             $options['verify'] = false;
         }
-        //$options['cookies'] = CookieJar::fromArray($params['cookieJar'], $params['cookieUrl']);
 
         $result = $client->request($method, $url, $options);
 
         $response = $this->response([
             'status' => true,
-            'errCode' => $result->getErrCode(),
+            'errCode' => 0,
             'statusCode' => $result->getStatusCode(),
             'headers' => $result->getHeaders(),
-            'cookies' => $result->getCookies(),
-            'url' => $result->getUrl(),
+            'cookies' => [],
+            'url' => '',//$result->getHeaders(),
             'body' => (string)$result->getBody()
         ]);
 
