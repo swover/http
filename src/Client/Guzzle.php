@@ -4,6 +4,7 @@ namespace Swover\Http\Client;
 
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
+use GuzzleHttp\TransferStats;
 
 class Guzzle extends BaseClient
 {
@@ -36,6 +37,10 @@ class Guzzle extends BaseClient
             $options['verify'] = false;
         }
 
+        $options['on_stats'] = function (TransferStats $stats) use (&$url) {
+            $url = (string)$stats->getEffectiveUri();
+        };
+
         try {
             $result = $client->request($method, $url, $options);
 
@@ -52,7 +57,7 @@ class Guzzle extends BaseClient
                     }
                     return $cookies;
                 })(),
-                'url' => '',//$result->getHeaders(),
+                'url' => $url,
                 'body' => (string)$result->getBody()
             ]);
 
