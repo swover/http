@@ -3,6 +3,7 @@
 namespace Swover\Http\Client;
 
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 
 class Guzzle extends BaseClient
 {
@@ -43,7 +44,14 @@ class Guzzle extends BaseClient
                 'errCode' => 0,
                 'statusCode' => $result->getStatusCode(),
                 'headers' => $result->getHeaders(),
-                'cookies' => [],
+                'cookies' => (function () use ($result) {
+                    $cookies = [];
+                    foreach ($result->getHeader('Set-Cookie') as $cookString) {
+                        $cookie = SetCookie::fromString($cookString);
+                        $cookies[$cookie->getName()] = $cookie->getValue();
+                    }
+                    return $cookies;
+                })(),
                 'url' => '',//$result->getHeaders(),
                 'body' => (string)$result->getBody()
             ]);
