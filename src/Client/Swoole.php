@@ -20,9 +20,8 @@ class Swoole extends BaseClient
 
         $headers = $this->buildHeaders($params);
         $headers['host'] = $headers['host'] ?? $urlInfo['host'];
-        $client->setHeaders(array_merge($options['headers'], $headers));
-
-        $client->set(array_merge($options['setting'], $this->buildSetting($params)));
+        $client->setHeaders(array_merge($options['headers'] ?? [], $headers));
+        $client->set(array_merge($options['setting'] ?? [], $this->buildSetting($params)));
 
         if (isset($options['cookies']) && is_array($options['cookies'])) {
             $client->setCookies($options['cookies']);
@@ -34,7 +33,7 @@ class Swoole extends BaseClient
             $client->setData($options['json']);
         }
 
-        $path = $urlInfo['path'] . $urlInfo['query'] ? ('?' . $urlInfo['query']) : '';
+        $path = $urlInfo['path'] . ($urlInfo['query'] ? ('?' . $urlInfo['query']) : '');
         if ($method == 'POST' && isset($options['form_params'])) {
             $client->post($path, $options['form_params'] ?? []);
         } else {
@@ -72,7 +71,7 @@ class Swoole extends BaseClient
 
     private function buildHeaders($params)
     {
-        $headers = isset($params['headers']) ? $params['headers'] : [];
+        $headers = $params['headers'] ?? [];
 
         if (!isset($headers['user-agent'])) {
             if (boolval($params['mobile_agent'] ?? false) === true) {

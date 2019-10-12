@@ -48,13 +48,17 @@ abstract class BaseClient
 
     protected function parseUrl($url)
     {
-        return array_merge([
-            'schema' => 'http',
+        $info = array_merge([
+            'scheme' => 'http',
             'host' => '',
-            'port' => 80,
+            'port' => -1,
             'path' => '/',
             'query' => '',
         ], \parse_url($url));
+
+        if ($info['port'] == -1) {
+            $info['port'] = $info['scheme'] == 'https' ? 443 : 80;
+        }
     }
 
     protected function formatParams(array $array)
