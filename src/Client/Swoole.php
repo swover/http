@@ -14,7 +14,7 @@ class Swoole extends BaseClient
 
         $urlInfo = $this->parseUrl($url);
 
-        $client = new Client($urlInfo['host'], $urlInfo['port'], $urlInfo['schema'] === 'https' ? true : null);
+        $client = new Client($urlInfo['host'], $urlInfo['port'], $urlInfo['scheme'] === 'https' ? true : null);
 
         $options = array_merge($params['options'] ?? [], $this->buildOptions($params));
 
@@ -93,14 +93,14 @@ class Swoole extends BaseClient
 
         $proxy = $this->getProxy($params['proxy'] ?? false);
         if (($proxy['host'] ?? false) && ($proxy['host'] ?? false)) {
-            $schema = $proxy['schema'] ?? 'http';
-            if ($schema == 'http') {
+            $scheme = $proxy['scheme'] ?? 'http';
+            if ($scheme == 'http') {
                 $result['http_proxy_host'] = $proxy['host'];
                 $result['http_proxy_port'] = $proxy['port'];
                 $result['http_proxy_user'] = $proxy['user'] ?? '';
                 $result['http_proxy_password'] = $proxy['pass'] ?? '';
             }
-            if ($schema == 'socks5') {
+            if ($scheme == 'socks5') {
                 $result['socks5_host'] = $proxy['host'];
                 $result['socks5_port'] = $proxy['port'];
                 $result['socks5_username'] = $proxy['user'] ?? '';

@@ -32,7 +32,7 @@ class Guzzle extends BaseClient
             $options['cookies'] = CookieJar::fromArray($params['cookies'], $urlInfo['host']);
         }
 
-        if ($urlInfo['schema'] === 'https') {
+        if ($urlInfo['scheme'] === 'https') {
             $options['ssl.certificate_authority'] = false;
             $options['verify'] = false;
         }
@@ -82,8 +82,8 @@ class Guzzle extends BaseClient
          */
         $proxy = $this->getProxy($params['proxy'] ?? false);
         if (($proxy['host'] ?? false) && ($proxy['host'] ?? false)) {
-            $schema = $proxy['schema'] ?? 'http';
-            $options['proxy'] = $schema . '://';
+            $scheme = $proxy['scheme'] ?? 'http';
+            $options['proxy'] = $scheme . '://';
             if ($proxy['user'] ?? false) {
                 $options['proxy'] .= $proxy['user'] . ':' . ($proxy['pass'] ?? '') . '@';
             }

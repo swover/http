@@ -2,11 +2,6 @@
 
 namespace Swover\Http;
 
-use Swover\Http\Client\Curl;
-use Swover\Http\Client\Guzzle;
-use Swover\Http\Client\Stream;
-use Swover\Http\Client\Swoole;
-
 /**
  * @method static Response get($url, $params = [])
  * @method static Response post($url, $params = [])
