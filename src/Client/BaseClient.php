@@ -59,6 +59,14 @@ abstract class BaseClient
         if ($info['port'] == -1) {
             $info['port'] = $info['scheme'] == 'https' ? 443 : 80;
         }
+
+        if (empty($info['host'])) {
+            $paths = explode('/', $info['path'], 2);
+            $info['host'] = array_shift($paths);
+            $info['path'] = '/'.array_shift($paths);
+        }
+
+        return $info;
     }
 
     protected function formatParams(array $array)
